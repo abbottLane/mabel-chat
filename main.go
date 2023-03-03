@@ -3,13 +3,13 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"flag"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"bufio"
 	"errors"
+	"strings"
 )
 
 // ReadFirstLine reads the first line of a text file
@@ -44,10 +44,9 @@ func readResponse(resp []byte) (map[string]interface{}, error) {
 }
 
 func main() {
-	prompt := flag.String("prompt", "", "The prompt to give to the OpenAI chat API")
-	flag.Parse()
-
-	if *prompt == "" {
+    args := os.Args[1:] // exclude the first argument (program name)
+    prompt := strings.Join(args, " ")
+	if prompt == "" {
 		fmt.Println("Please provide a prompt using the -prompt flag")
 		os.Exit(1)
 	}
@@ -56,12 +55,12 @@ func main() {
 		"model": "gpt-3.5-turbo",
 		"messages": []map[string]interface{}{
 			{"role": "system", "content": "You are a helpful assistant who is excellent at answering questions and writing code."},
-			{"role": "user", "content": *prompt},		
+			{"role": "user", "content": prompt},		
 		},
 	}
     
 	body, _ := json.Marshal(data)
-    credentials, err := loadCredentials("openai_api_key.txt")
+    credentials, err := loadCredentials("/Users/wlaneamz/projects/go-workspace/src/github.com/abbottLane/mabel-chat/openai_api_key.txt")
 	req, err := http.NewRequest("POST", "https://api.openai.com/v1/chat/completions", bytes.NewBuffer(body))
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer " + credentials)
